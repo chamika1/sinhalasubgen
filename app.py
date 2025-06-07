@@ -43,7 +43,7 @@ class MultiAPISubtitleTranslator:
         self.translation_active = False
         self.completed_batches = 0
         
-        self.title_colors = ["#FF0000", "#FF4500", "#FF6347", "#FF7F50", "#FF8C00"] # Red, OrangeRed, Tomato, Coral, DarkOrange
+        self.title_colors = ["#FFFF00", "#FFEE00", "#FFD700", "#FFC300", "#FFAA00"] # Yellow, LighterYellow, Gold, GoldenYellow, OrangeYellow
         self.current_title_color_index = 0
         
         self.setup_ui()
@@ -344,7 +344,7 @@ class MultiAPISubtitleTranslator:
             height=10,
             bg='#34495e',
             fg='#ecf0f1',
-            font=(self.sinhala_font, 10),
+            font=(self.sinhala_font, 10, "bold"),
             wrap='word'
         )
         self.log_text.pack(fill='both', expand=True, pady=5, padx=5)
@@ -455,7 +455,10 @@ class MultiAPISubtitleTranslator:
                 self.log_message(f"🔄 Processing batch {batch_num}/{total_batches} with API key {self.current_api_index + 1}")
                 
                 response = model.generate_content(prompt)
-                translated_texts = self.parse_batch_response(response.text, len(batch))
+                translated_texts_raw = self.parse_batch_response(response.text, len(batch))
+                
+                # Make translated text bold
+                translated_texts_bold = [f"<b>{text}</b>" if text != "Translation failed" else text for text in translated_texts_raw]
                 
                 # Create translated batch
                 translated_batch = []
@@ -463,7 +466,7 @@ class MultiAPISubtitleTranslator:
                     translated_batch.append({
                         'index': subtitle['index'],
                         'timestamp': subtitle['timestamp'],
-                        'text': translated_texts[i] if i < len(translated_texts) else subtitle['text']
+                        'text': translated_texts_bold[i] if i < len(translated_texts_bold) else f"<b>{subtitle['text']}</b>" # Bold original if translation failed
                     })
                 
                 self.log_message(f"✅ Batch {batch_num} completed successfully")
